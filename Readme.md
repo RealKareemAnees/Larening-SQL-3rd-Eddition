@@ -2519,3 +2519,31 @@ ORDER BY
 ---
 
 END CHAPTER 11
+
+# Chapter 12: _TRansactions_
+
+transaction is a mechanism of excecuting queries quantized, so if a query in the transaction fails; then our system is safe from errors as the DBMS will rollback
+
+<p style="color:red;">because it is late night and my brain is blowin rn, I will not explain trnsactions here, If you are two weeks after the publication of this repo then there will be a database engineering summare that is better than this that explain all of such DBMS's topics</p>
+
+this is how to write a transaction
+
+```sql
+BEGIN TRANSACTION;
+
+UPDATE BankAccounts SET balance = balance - 100 WHERE name = 'Alice';
+
+-- Simulating an error (dividing by zero)
+SELECT 1/0;
+
+UPDATE BankAccounts SET balance = balance + 100 WHERE name = 'Bob';
+
+COMMIT;  -- This won't execute due to the error
+
+-- Since an error occurred, use:
+ROLLBACK;  -- Undo changes
+```
+
+---
+
+END OF CHAPTER 12
