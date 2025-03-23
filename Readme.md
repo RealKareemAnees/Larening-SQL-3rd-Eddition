@@ -2477,3 +2477,45 @@ INNER JOIN Departments d ON e.id = d.emp_id;
 ---
 
 END CHAPTER 10
+
+# Chapter 11: _Case Expression_
+
+to specify excecution path
+
+```sql
+CASE
+    WHEN condition1 THEN result1
+    WHEN condition2 THEN result2
+    ...
+    ELSE default_result
+END
+```
+
+for example
+
+```sql
+SELECT id, name, score,
+    CASE
+        WHEN score >= 80 THEN 'Excellent'
+        WHEN score >= 60 THEN 'Good'
+        ELSE 'Needs Improvement'
+    END AS grade
+FROM Students;
+```
+
+with order by
+
+```sql
+SELECT id, name, score
+FROM Students
+ORDER BY
+    CASE
+        WHEN score >= 80 THEN 1  -- Excellent first
+        WHEN score >= 60 THEN 2  -- Good second
+        ELSE 3                   -- Needs Improvement last
+    END;
+```
+
+---
+
+END CHAPTER 11
