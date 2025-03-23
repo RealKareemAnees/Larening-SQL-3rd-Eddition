@@ -141,3 +141,168 @@ currency ENUM('EGP', 'USD', 'SAR')
 ---
 
 END OF CHAPTER 2
+
+# Chapter 3
+
+this chapter talks about basic query clauses such as `SELECT` and `FROM`, etc...
+
+but before diving into this; to view or export data as JSON for example
+
+```SQL
+SELECT json_object('id', id, 'name', name, 'balance', balance) FROM my_table;
+```
+
+outputs like
+
+```json
+{"id":1, "name":"Alice", "balance":1000.50}
+{"id":2, "name":"Bob", "balance":200.75}
+```
+
+## Clauses
+
+Each of the following clauses will be discusses in detail in it's chapter but for now they are
+
+### **Query Mechanics**
+
+- SQL queries are used to retrieve, filter, and manipulate data from a database.
+- The basic structure follows:
+  ```sql
+  SELECT columns FROM table WHERE condition;
+  ```
+
+---
+
+### **Query Clauses**
+
+- SQL queries consist of different clauses like `SELECT`, `FROM`, `WHERE`, `ORDER BY`, etc.
+- These clauses define what data to retrieve and how to process it.
+
+---
+
+### **The SELECT Clause**
+
+- Used to specify which columns to fetch from a table.
+  ```sql
+  SELECT name, age FROM users;
+  ```
+- You can also use `*` to fetch all columns:
+  ```sql
+  SELECT * FROM users;
+  ```
+
+---
+
+### **Column Aliases**
+
+- Renames a column in the output using `AS`.
+  ```sql
+  SELECT name AS full_name, age AS user_age FROM users;
+  ```
+- Useful for improving readability in reports.
+
+---
+
+### **Removing Duplicates**
+
+- Use `DISTINCT` to eliminate duplicate values in the result set.
+  ```sql
+  SELECT DISTINCT country FROM users;
+  ```
+
+---
+
+### **The FROM Clause**
+
+- Specifies the table to fetch data from.
+  ```sql
+  SELECT * FROM users;
+  ```
+- Can include joins with multiple tables.
+
+---
+
+### **Tables**
+
+- A table consists of rows and columns, similar to an Excel sheet.
+- Each column has a defined data type (e.g., `INT`, `VARCHAR`, `DATE`).
+
+---
+
+### **Table Links**
+
+- Tables can be linked using `JOIN` operations.
+  ```sql
+  SELECT users.name, orders.amount
+  FROM users
+  JOIN orders ON users.id = orders.user_id;
+  ```
+- Common types: `INNER JOIN`, `LEFT JOIN`, `RIGHT JOIN`, `FULL JOIN`.
+
+---
+
+### **Defining Table Aliases**
+
+- Shortens table names in queries using `AS`.
+  ```sql
+  SELECT u.name, o.amount
+  FROM users AS u
+  JOIN orders AS o ON u.id = o.user_id;
+  ```
+- Helps simplify complex queries.
+
+---
+
+### **The WHERE Clause**
+
+- Filters rows based on conditions.
+  ```sql
+  SELECT * FROM users WHERE age > 18;
+  ```
+- Supports conditions with `AND`, `OR`, `LIKE`, etc.
+
+---
+
+### **The GROUP BY and HAVING Clauses**
+
+- `GROUP BY`: Groups rows with the same values.
+  ```sql
+  SELECT country, COUNT(*) FROM users GROUP BY country;
+  ```
+- `HAVING`: Filters grouped results.
+  ```sql
+  SELECT country, COUNT(*) FROM users GROUP BY country HAVING COUNT(*) > 10;
+  ```
+
+---
+
+### **The ORDER BY Clause**
+
+- Sorts the result set.
+  ```sql
+  SELECT * FROM users ORDER BY age;
+  ```
+
+---
+
+### **Ascending vs. Descending Sort Order**
+
+- `ASC` (default) sorts from smallest to largest.
+- `DESC` sorts from largest to smallest.
+  ```sql
+  SELECT * FROM users ORDER BY age DESC;
+  ```
+
+---
+
+### **Sorting via Numeric Placeholders**
+
+- Instead of column names, use column positions.
+  ```sql
+  SELECT name, age FROM users ORDER BY 2 DESC;
+  ```
+- `2` refers to the second column (`age` in this case).
+
+---
+
+THE END OF CHAPTER 3
