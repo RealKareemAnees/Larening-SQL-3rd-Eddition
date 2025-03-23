@@ -1472,3 +1472,343 @@ Type conversions are particularly important when:
 ---
 
 END OF CHAPTER 7
+
+# Chapter 8: _Grouping and Aggregations_
+
+## Some Useful Aggregate Functions
+
+### 1. COUNT()
+
+Counts the number of rows in a group.
+
+```sql
+SELECT COUNT(*) AS total_customers FROM customers;
+```
+
+**Example Output:**
+| total_customers |
+|----------------|
+| 100 |
+
+---
+
+### 2. SUM()
+
+Calculates the total sum of a numeric column.
+
+```sql
+SELECT SUM(price) AS total_revenue FROM orders;
+```
+
+**Example Output:**
+| total_revenue |
+|--------------|
+| 25000 |
+
+---
+
+### 3. AVG()
+
+Calculates the average (mean) value of a numeric column.
+
+```sql
+SELECT AVG(salary) AS average_salary FROM employees;
+```
+
+**Example Output:**
+| average_salary |
+|--------------|
+| 5000 |
+
+---
+
+### 4. MAX()
+
+Finds the highest value in a column.
+
+```sql
+SELECT MAX(price) AS highest_price FROM products;
+```
+
+**Example Output:**
+| highest_price |
+|--------------|
+| 999 |
+
+---
+
+### 5. MIN()
+
+Finds the lowest value in a column.
+
+```sql
+SELECT MIN(price) AS lowest_price FROM products;
+```
+
+**Example Output:**
+| lowest_price |
+|-------------|
+| 10 |
+
+---
+
+### 6. GROUP_CONCAT()
+
+Concatenates values from a grouped column into a single string.
+
+```sql
+SELECT category, GROUP_CONCAT(product_name) AS products_list
+FROM products
+GROUP BY category;
+```
+
+**Example Output:**
+| category | products_list |
+|-----------|------------------------|
+| Electronics | Laptop, Phone, Tablet |
+| Furniture | Chair, Desk |
+
+---
+
+### 7. VARIANCE() (or VAR_SAMP, VAR_POP)
+
+Calculates the variance of a numeric column.
+
+```sql
+SELECT VARIANCE(salary) AS salary_variance FROM employees;
+```
+
+---
+
+### 8. STDDEV() (or STDDEV_SAMP, STDDEV_POP)
+
+Calculates the standard deviation of a numeric column.
+
+```sql
+SELECT STDDEV(salary) AS salary_stddev FROM employees;
+```
+
+---
+
+### Example: Using Multiple Aggregate Functions Together
+
+```sql
+SELECT
+    COUNT(*) AS total_orders,
+    SUM(price) AS total_revenue,
+    AVG(price) AS avg_order_price,
+    MAX(price) AS highest_order,
+    MIN(price) AS lowest_order
+FROM orders;
+```
+
+This query provides useful business insights in a single query.
+
+## Grouping
+
+### GROUP BY Clause
+
+The `GROUP BY` clause is used to group rows with the same values in one or more columns and apply aggregate functions to each group.
+
+#### **Syntax**
+
+```sql
+SELECT column_name, AGGREGATE_FUNCTION(column_name)
+FROM table_name
+GROUP BY column_name;
+```
+
+#### **Example: Total Sales by Category**
+
+```sql
+SELECT category, SUM(price * quantity) AS total_sales
+FROM sales
+GROUP BY category;
+```
+
+##### **Output:**
+
+| category    | total_sales |
+| ----------- | ----------- |
+| Electronics | 19100       |
+| Furniture   | 5100        |
+
+---
+
+### GROUPING MULTIPLE COLUMNS
+
+You can group by multiple columns to get more granular summaries.
+
+#### **Example: Total Sales by Category and Product**
+
+```sql
+SELECT category, product, SUM(price * quantity) AS total_sales
+FROM sales
+GROUP BY category, product;
+```
+
+##### **Output:**
+
+| category    | product | total_sales |
+| ----------- | ------- | ----------- |
+| Electronics | Laptop  | 5000        |
+| Electronics | Phone   | 5000        |
+| Electronics | Tablet  | 4900        |
+| Furniture   | Chair   | 2250        |
+| Furniture   | Desk    | 2000        |
+
+---
+
+### GROUP BY with HAVING Clause
+
+- The `HAVING` clause filters the groups after aggregation (unlike `WHERE`, which filters rows before aggregation).
+
+#### **Example: Filter Categories with Total Sales Over 5000**
+
+```sql
+SELECT category, SUM(price * quantity) AS total_sales
+FROM sales
+GROUP BY category
+HAVING total_sales > 5000;
+```
+
+##### **Output:**
+
+| category    | total_sales |
+| ----------- | ----------- |
+| Electronics | 19100       |
+
+---
+
+## Some Useful Aggregate Functions
+
+### 1. COUNT()
+
+Counts the number of rows in a group.
+
+```sql
+SELECT COUNT(*) AS total_customers FROM customers;
+```
+
+**Example Output:**
+| total_customers |
+|----------------|
+| 100 |
+
+---
+
+### 2. SUM()
+
+Calculates the total sum of a numeric column.
+
+```sql
+SELECT SUM(price) AS total_revenue FROM orders;
+```
+
+**Example Output:**
+| total_revenue |
+|--------------|
+| 25000 |
+
+---
+
+### 3. AVG()
+
+Calculates the average (mean) value of a numeric column.
+
+```sql
+SELECT AVG(salary) AS average_salary FROM employees;
+```
+
+**Example Output:**
+| average_salary |
+|--------------|
+| 5000 |
+
+---
+
+### 4. MAX()
+
+Finds the highest value in a column.
+
+```sql
+SELECT MAX(price) AS highest_price FROM products;
+```
+
+**Example Output:**
+| highest_price |
+|--------------|
+| 999 |
+
+---
+
+### 5. MIN()
+
+Finds the lowest value in a column.
+
+```sql
+SELECT MIN(price) AS lowest_price FROM products;
+```
+
+**Example Output:**
+| lowest_price |
+|-------------|
+| 10 |
+
+---
+
+### 6. GROUP_CONCAT()
+
+Concatenates values from a grouped column into a single string.
+
+```sql
+SELECT category, GROUP_CONCAT(product_name) AS products_list
+FROM products
+GROUP BY category;
+```
+
+**Example Output:**
+| category | products_list |
+|-----------|------------------------|
+| Electronics | Laptop, Phone, Tablet |
+| Furniture | Chair, Desk |
+
+---
+
+### 7. VARIANCE() (or VAR_SAMP, VAR_POP)
+
+Calculates the variance of a numeric column.
+
+```sql
+SELECT VARIANCE(salary) AS salary_variance FROM employees;
+```
+
+---
+
+### 8. STDDEV() (or STDDEV_SAMP, STDDEV_POP)
+
+Calculates the standard deviation of a numeric column.
+
+```sql
+SELECT STDDEV(salary) AS salary_stddev FROM employees;
+```
+
+---
+
+### Example: Using Multiple Aggregate Functions Together
+
+```sql
+SELECT
+    COUNT(*) AS total_orders,
+    SUM(price) AS total_revenue,
+    AVG(price) AS avg_order_price,
+    MAX(price) AS highest_order,
+    MIN(price) AS lowest_order
+FROM orders;
+```
+
+This query provides useful business insights in a single query.
+
+---
+
+END OF CHAPTER 8
