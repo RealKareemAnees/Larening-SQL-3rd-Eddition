@@ -825,3 +825,193 @@ Imagine a table `customers`:
 ---
 
 END OF CHAPTER 4
+
+# Chapter 5: _Quering multiple tables_
+
+**this chapter gives an introduction to joins**
+
+joins are more of a design than syntax bu this book is only concerned by syntax
+
+1. **INNER JOIN** – Returns only matching rows from both tables.
+
+   - Example: Get customers who placed an order.
+
+   ```sql
+   SELECT customers.name, orders.order_id
+   FROM customers
+   INNER JOIN orders ON customers.id = orders.customer_id;
+   ```
+
+2. **LEFT JOIN (or LEFT OUTER JOIN)** – Returns all rows from the left table and matching rows from the right table. If there’s no match, NULL is returned for columns from the right table.
+
+   - Example: Get all customers, even those who haven’t placed an order.
+
+   ```sql
+   SELECT customers.name, orders.order_id
+   FROM customers
+   LEFT JOIN orders ON customers.id = orders.customer_id;
+   ```
+
+3. **RIGHT JOIN (or RIGHT OUTER JOIN)** – Returns all rows from the right table and matching rows from the left table. If there’s no match, NULL is returned for columns from the left table.
+
+   - Example: Get all orders, even if they don’t have a customer.
+
+   ```sql
+   SELECT customers.name, orders.order_id
+   FROM customers
+   RIGHT JOIN orders ON customers.id = orders.customer_id;
+   ```
+
+4. **FULL JOIN (or FULL OUTER JOIN)** – Returns all rows from both tables, with NULLs where there is no match.
+
+   - Example: Get all customers and orders, including those without matches.
+
+   ```sql
+   SELECT customers.name, orders.order_id
+   FROM customers
+   FULL JOIN orders ON customers.id = orders.customer_id;
+   ```
+
+5. **CROSS JOIN** – Returns all possible combinations (cartesian product) of both tables.
+   - Example: Pair every customer with every order.
+   ```sql
+   SELECT customers.name, orders.order_id
+   FROM customers
+   CROSS JOIN orders;
+   ```
+
+> Joins will be revisited in chapter 10 with more detail
+
+## Some Demonstrative Examples
+
+#### **Customers Table**
+
+| id  | name    | country |
+| --- | ------- | ------- |
+| 1   | Alice   | USA     |
+| 2   | Bob     | Canada  |
+| 3   | Charlie | UK      |
+| 4   | David   | Egypt   |
+
+#### **Orders Table**
+
+| order_id | customer_id | product  |
+| -------- | ----------- | -------- |
+| 101      | 1           | Laptop   |
+| 102      | 2           | Phone    |
+| 103      | 1           | Keyboard |
+| 104      | 3           | Monitor  |
+
+---
+
+### **JOIN Examples**
+
+#### **1. INNER JOIN** (Only customers who placed orders)
+
+```sql
+SELECT customers.name, orders.order_id, orders.product
+FROM customers
+INNER JOIN orders ON customers.id = orders.customer_id;
+```
+
+✅ **Result:**
+| name | order_id | product |
+|--------|---------|----------|
+| Alice | 101 | Laptop |
+| Alice | 103 | Keyboard |
+| Bob | 102 | Phone |
+| Charlie| 104 | Monitor |
+
+_(David is missing because he has no orders.)_
+
+---
+
+#### **2. LEFT JOIN** (All customers, even those with no orders)
+
+```sql
+SELECT customers.name, orders.order_id, orders.product
+FROM customers
+LEFT JOIN orders ON customers.id = orders.customer_id;
+```
+
+✅ **Result:**
+| name | order_id | product |
+|---------|---------|----------|
+| Alice | 101 | Laptop |
+| Alice | 103 | Keyboard |
+| Bob | 102 | Phone |
+| Charlie | 104 | Monitor |
+| David | NULL | NULL |
+
+_(David is included, but with NULL values for order details.)_
+
+---
+
+#### **3. RIGHT JOIN** (All orders, even if they don't match a customer)
+
+```sql
+SELECT customers.name, orders.order_id, orders.product
+FROM customers
+RIGHT JOIN orders ON customers.id = orders.customer_id;
+```
+
+✅ **Result:**
+| name | order_id | product |
+|---------|---------|----------|
+| Alice | 101 | Laptop |
+| Alice | 103 | Keyboard |
+| Bob | 102 | Phone |
+| Charlie | 104 | Monitor |
+
+_(Same result as INNER JOIN because every order has a matching customer.)_
+
+---
+
+#### **4. FULL OUTER JOIN** (All customers and all orders, even if no match)
+
+```sql
+SELECT customers.name, orders.order_id, orders.product
+FROM customers
+FULL JOIN orders ON customers.id = orders.customer_id;
+```
+
+✅ **Result:**
+| name | order_id | product |
+|---------|---------|----------|
+| Alice | 101 | Laptop |
+| Alice | 103 | Keyboard |
+| Bob | 102 | Phone |
+| Charlie | 104 | Monitor |
+| David | NULL | NULL |
+
+_(Same as LEFT JOIN here since all orders already have customers.)_
+
+---
+
+#### **5. CROSS JOIN** (Every customer paired with every order)
+
+```sql
+SELECT customers.name, orders.order_id, orders.product
+FROM customers
+CROSS JOIN orders;
+```
+
+✅ **Result:** _(All possible combinations of customers and orders)_
+| name | order_id | product |
+|---------|---------|----------|
+| Alice | 101 | Laptop |
+| Alice | 102 | Phone |
+| Alice | 103 | Keyboard |
+| Alice | 104 | Monitor |
+| Bob | 101 | Laptop |
+| Bob | 102 | Phone |
+| Bob | 103 | Keyboard |
+| Bob | 104 | Monitor |
+| Charlie | 101 | Laptop |
+| ... | ... | ... |
+
+_(Results will have **4 customers × 4 orders = 16 rows**.)_
+
+---
+
+END OF CHAPTER 5
