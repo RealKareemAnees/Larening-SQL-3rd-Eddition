@@ -1812,3 +1812,490 @@ This query provides useful business insights in a single query.
 ---
 
 END OF CHAPTER 8
+
+# Chapter 9: _Subqueries_
+
+Subqueries are queries nested within another SQL query, creating powerful ways to retrieve, filter, and transform data. They allow you to use the results of one query as part of another query.
+
+## **1. One Column, One Row (Scalar Subquery)**
+
+A **scalar subquery** returns a single value (one column, one row). It is often used in `SELECT`, `WHERE`, or `HAVING` clauses.
+
+### **Example: Get the most expensive product price**
+
+```SQL
+SELECT name, price
+FROM products
+WHERE price = (SELECT MAX(price) FROM products);
+```
+
+- The subquery `(SELECT MAX(price) FROM products)` returns a single value (highest price).
+- The main query finds the product with this price.
+
+## **2. One Column, Many Rows (List Subquery)**
+
+A subquery returning **multiple values in a single column** is used with `IN`, `ANY`, or `ALL`.
+
+### **Example: Get employees working in the 'Marketing' department**
+
+```SQL
+SELECT employee_name, salary
+FROM employees
+WHERE department_id IN (
+    SELECT department_id
+    FROM departments
+    WHERE department_name = 'Marketing'
+);
+```
+
+- The subquery `(SELECT department_id FROM departments WHERE department_name = 'Marketing')` returns a list of department IDs.
+- The main query selects employees from those departments.
+
+## **3. Many Columns, Many Rows (Table Subquery)**
+
+A subquery that returns **multiple columns and rows** can be used with `EXISTS`, `JOIN`, or as a derived table.
+
+### **Example: Find customers who have placed an order**
+
+```SQL
+SELECT name
+FROM customers
+WHERE EXISTS (
+    SELECT 1 FROM orders WHERE customers.id = orders.customer_id
+);
+```
+
+- The subquery `(SELECT 1 FROM orders WHERE customers.id = orders.customer_id)` checks if a customer has orders.
+- `EXISTS` returns `TRUE` if at least one matching row is found.
+
+### **Example: Use Subquery as a Derived Table**
+
+```SQL
+SELECT avg_salary.department_id, avg_salary.avg_salary
+FROM (
+    SELECT department_id, AVG(salary) AS avg_salary
+    FROM employees
+    GROUP BY department_id
+) AS avg_salary;
+```
+
+- The subquery `(SELECT department_id, AVG(salary) AS avg_salary FROM employees GROUP BY department_id)` calculates the average salary per department.
+- The main query retrieves this derived data.
+
+## Practical Use Cases for SQL Subqueries
+
+SQL subqueries provide flexible ways to solve complex data problems that would be difficult to express with simpler queries. Let me walk you through the major use cases where subqueries shine, with practical examples for each.
+
+## 1. Filtering Based on Aggregated Data
+
+One of the most common uses of subqueries is filtering records based on aggregated values that can't be directly accessed in a WHERE clause.
+
+```sql
+-- Find products that are priced above average
+SELECT product_name, price
+FROM products
+WHERE price > (
+    SELECT AVG(price)
+    FROM products
+);
+
+-- Find customers who have placed more than the average number of orders
+SELECT customer_name, COUNT(*) as order_count
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+GROUP BY c.customer_id, customer_name
+HAVING COUNT(*) > (
+    SELECT AVG(order_count)
+    FROM (
+        SELECT COUNT(*) AS order_count
+        FROM orders
+        GROUP BY customer_id
+    ) AS customer_orders
+);
+```
+
+This approach is necessary because you can't use aggregate functions directly in WHERE clauses. The subquery calculates the aggregate value first, which is then used by the outer query.
+
+### 2. Finding Records with No Matches (Anti-Join Pattern)
+
+Subqueries provide elegant ways to find records that don't have corresponding entries in another table.
+
+```sql
+-- Find products that have never been ordered
+SELECT product_id, product_name
+FROM products p
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM order_details od
+    WHERE od.product_id = p.product_id
+);
+
+-- Alternative using LEFT JOIN
+SELECT p.product_id, p.product_name
+FROM products p
+LEFT JOIN order_details od ON p.product_id = od.product_id
+WHERE od.product_id IS NULL;
+```
+
+The NOT EXISTS approach often performs better for large datasets than alternatives, as it can stop checking once it finds a single match.
+
+### 3. Dynamic Reporting with Row-by-Row Calculations
+
+Subqueries in SELECT clauses allow you to calculate specific metrics for each row that depend on other data in the database.
+
+```sql
+-- Sales report with percentage of total for each product
+SELECT
+    p.product_id,
+    p.product_name,
+    SUM(od.quantity * od.unit_price) AS product_sales,
+    (SUM(od.quantity * od.unit_price) / (
+        SELECT SUM(quantity * unit_price)
+        FROM order_details
+    )) * 100 AS percentage_of_total_sales
+FROM products p
+JOIN order_details od ON p.product_id = od.product_id
+GROUP BY p.product_id, p.product_name
+ORDER BY product_sales DESC;
+
+-- List each employee with their department's average salary for comparison
+SELECT
+    e.employee_id,
+    e.employee_name,
+    e.salary,
+    (SELECT AVG(salary) FROM employees WHERE department_id = e.department_id) AS dept_avg_salary,
+    e.salary - (SELECT AVG(salary) FROM employees WHERE department_id = e.department_id) AS diff_from_avg
+FROM employees e
+ORDER BY diff_from_avg DESC;
+```
+
+These subqueries create dynamic metrics that would be difficult to generate with joins alone, especially when comparing individual records against aggregates.
+
+### 4. Data Pivoting and Reshaping
+
+Subqueries can help transform data from rows to columns for reporting and analysis.
+
+```sql
+-- Create a quarterly sales summary by region
+SELECT
+    region,
+    (SELECT SUM(sales_amount) FROM sales s2
+     WHERE s2.region = s1.region AND EXTRACT(QUARTER FROM sale_date) = 1 AND EXTRACT(YEAR FROM sale_date) = 2023) AS Q1,
+    (SELECT SUM(sales_amount) FROM sales s2
+     WHERE s2.region = s1.region AND EXTRACT(QUARTER FROM sale_date) = 2 AND EXTRACT(YEAR FROM sale_date) = 2023) AS Q2,
+    (SELECT SUM(sales_amount) FROM sales s2
+     WHERE s2.region = s1.region AND EXTRACT(QUARTER FROM sale_date) = 3 AND EXTRACT(YEAR FROM sale_date) = 2023) AS Q3,
+    (SELECT SUM(sales_amount) FROM sales s2
+     WHERE s2.region = s1.region AND EXTRACT(QUARTER FROM sale_date) = 4 AND EXTRACT(YEAR FROM sale_date) = 2023) AS Q4
+FROM (SELECT DISTINCT region FROM sales WHERE EXTRACT(YEAR FROM sale_date) = 2023) s1
+ORDER BY region;
+```
+
+This approach creates a pivoted view of the data without requiring special pivot functions, which aren't available in all SQL implementations.
+
+### 5. Multi-Step Data Transformations
+
+Complex data processing often requires multiple transformation steps. Subqueries in the FROM clause let you perform transformations in stages, making queries easier to understand and debug.
+
+```sql
+-- Calculate year-over-year growth by product category
+SELECT
+    current_year.category_name,
+    current_year.sales AS current_year_sales,
+    previous_year.sales AS previous_year_sales,
+    (current_year.sales - previous_year.sales) / previous_year.sales * 100 AS growth_percentage
+FROM
+    (SELECT c.category_name, SUM(od.quantity * od.unit_price) AS sales
+     FROM categories c
+     JOIN products p ON c.category_id = p.category_id
+     JOIN order_details od ON p.product_id = od.product_id
+     JOIN orders o ON od.order_id = o.order_id
+     WHERE EXTRACT(YEAR FROM o.order_date) = 2023
+     GROUP BY c.category_name) AS current_year
+JOIN
+    (SELECT c.category_name, SUM(od.quantity * od.unit_price) AS sales
+     FROM categories c
+     JOIN products p ON c.category_id = p.category_id
+     JOIN order_details od ON p.product_id = od.product_id
+     JOIN orders o ON od.order_id = o.order_id
+     WHERE EXTRACT(YEAR FROM o.order_date) = 2022
+     GROUP BY c.category_name) AS previous_year
+ON current_year.category_name = previous_year.category_name
+ORDER BY growth_percentage DESC;
+```
+
+Each subquery performs a specific calculation, and the main query combines the results. This approach makes complex analytics more manageable and readable.
+
+### 6. Top-N Per Group Problems
+
+Subqueries excel at finding the top records within each category or group, a common requirement in business reporting.
+
+```sql
+-- Find the most recent order for each customer
+SELECT o.*
+FROM orders o
+WHERE o.order_date = (
+    SELECT MAX(order_date)
+    FROM orders o2
+    WHERE o2.customer_id = o.customer_id
+);
+
+-- Find the top 3 selling products in each category
+SELECT *
+FROM (
+    SELECT
+        p.category_id,
+        p.product_id,
+        p.product_name,
+        SUM(od.quantity) AS total_quantity,
+        ROW_NUMBER() OVER (PARTITION BY p.category_id ORDER BY SUM(od.quantity) DESC) AS rank
+    FROM products p
+    JOIN order_details od ON p.product_id = od.product_id
+    GROUP BY p.category_id, p.product_id, p.product_name
+) ranked_products
+WHERE rank <= 3;
+```
+
+The second example combines a subquery with window functions for an elegant solution to the "top N per group" problem.
+
+### 7. Dynamic Data Validation and Constraints
+
+Subqueries can implement complex business rules and validations that go beyond simple constraints.
+
+```sql
+-- Ensure a new order doesn't exceed the customer's credit limit
+INSERT INTO orders (order_id, customer_id, order_date, total_amount)
+SELECT
+    12345,
+    101,
+    CURRENT_DATE,
+    500.00
+WHERE 500.00 + (
+    SELECT COALESCE(SUM(total_amount), 0)
+    FROM orders
+    WHERE customer_id = 101 AND payment_status = 'Unpaid'
+) <= (
+    SELECT credit_limit
+    FROM customers
+    WHERE customer_id = 101
+);
+
+-- Reject product price changes that exceed 10% of the average price in their category
+UPDATE products
+SET price = 29.99
+WHERE product_id = 123
+AND 29.99 BETWEEN (
+    SELECT 0.9 * AVG(price)
+    FROM products
+    WHERE category_id = (SELECT category_id FROM products WHERE product_id = 123)
+) AND (
+    SELECT 1.1 * AVG(price)
+    FROM products
+    WHERE category_id = (SELECT category_id FROM products WHERE product_id = 123)
+);
+```
+
+These examples show how subqueries can enforce sophisticated business rules during data modifications.
+
+### 8. Time Series Gap Analysis
+
+Identifying gaps in sequential data is a common challenge that subqueries handle effectively.
+
+```sql
+-- Find dates with no sales in a date range
+WITH date_series AS (
+    SELECT DATEADD(day, seq, '2023-01-01') AS calendar_date
+    FROM (
+        SELECT ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) - 1 AS seq
+        FROM information_schema.columns c1
+        CROSS JOIN information_schema.columns c2
+        LIMIT 365
+    ) seq_numbers
+    WHERE DATEADD(day, seq, '2023-01-01') <= '2023-12-31'
+)
+SELECT calendar_date
+FROM date_series ds
+LEFT JOIN daily_sales s ON ds.calendar_date = s.sale_date
+WHERE s.sale_date IS NULL
+ORDER BY calendar_date;
+```
+
+This query generates all dates in a range and then identifies those without corresponding sales records.
+
+### 9. Hierarchical Data Queries
+
+Querying hierarchical data like organizational charts or product categories requires specialized techniques, often involving subqueries.
+
+```sql
+-- Find all employees under a specific manager (recursive approach)
+WITH employee_hierarchy AS (
+    -- Base case: start with the manager
+    SELECT employee_id, employee_name, manager_id, 1 AS level
+    FROM employees
+    WHERE employee_id = 5
+
+    UNION ALL
+
+    -- Recursive case: add employees who report to someone in our hierarchy
+    SELECT e.employee_id, e.employee_name, e.manager_id, eh.level + 1
+    FROM employees e
+    JOIN employee_hierarchy eh ON e.manager_id = eh.employee_id
+)
+SELECT * FROM employee_hierarchy
+ORDER BY level, employee_name;
+```
+
+This recursive common table expression (CTE) builds a hierarchy starting from a specific employee and finding all direct and indirect reports.
+
+### 10. Data Anomaly Detection
+
+Subqueries help identify outliers and anomalies in data by comparing values against statistical norms.
+
+```sql
+-- Find orders with unusually high values (more than 2 standard deviations above average)
+SELECT order_id, customer_id, total_amount
+FROM orders
+WHERE total_amount > (
+    SELECT AVG(total_amount) + 2 * STDDEV(total_amount)
+    FROM orders
+);
+
+-- Find products with sudden sales spikes (more than 200% of their average)
+SELECT
+    p.product_id,
+    p.product_name,
+    o.order_date,
+    SUM(od.quantity) AS daily_quantity
+FROM products p
+JOIN order_details od ON p.product_id = od.product_id
+JOIN orders o ON od.order_id = o.order_id
+GROUP BY p.product_id, p.product_name, o.order_date
+HAVING SUM(od.quantity) > 2 * (
+    SELECT AVG(daily_qty)
+    FROM (
+        SELECT
+            p2.product_id,
+            o2.order_date,
+            SUM(od2.quantity) AS daily_qty
+        FROM products p2
+        JOIN order_details od2 ON p2.product_id = od2.product_id
+        JOIN orders o2 ON od2.order_id = o2.order_id
+        WHERE p2.product_id = p.product_id
+        GROUP BY p2.product_id, o2.order_date
+    ) AS product_daily_sales
+)
+ORDER BY o.order_date DESC;
+```
+
+These queries identify potentially suspicious transactions or unusual sales patterns that might warrant investigation.
+
+### 11. Comparing Current Values with Historical Snapshots
+
+Subqueries can efficiently compare current data with historical values to track changes over time.
+
+```sql
+-- Find products whose prices have increased by more than 20% since last year
+SELECT
+    p.product_id,
+    p.product_name,
+    p.current_price,
+    (
+        SELECT price
+        FROM product_price_history
+        WHERE product_id = p.product_id
+        AND price_effective_date = (
+            SELECT MAX(price_effective_date)
+            FROM product_price_history
+            WHERE product_id = p.product_id
+            AND price_effective_date <= DATEADD(year, -1, CURRENT_DATE)
+        )
+    ) AS price_one_year_ago,
+    (p.current_price / (
+        SELECT price
+        FROM product_price_history
+        WHERE product_id = p.product_id
+        AND price_effective_date = (
+            SELECT MAX(price_effective_date)
+            FROM product_price_history
+            WHERE product_id = p.product_id
+            AND price_effective_date <= DATEADD(year, -1, CURRENT_DATE)
+        )
+    ) - 1) * 100 AS price_increase_percentage
+FROM products p
+WHERE p.current_price > 1.2 * (
+    SELECT price
+    FROM product_price_history
+    WHERE product_id = p.product_id
+    AND price_effective_date = (
+        SELECT MAX(price_effective_date)
+        FROM product_price_history
+        WHERE product_id = p.product_id
+        AND price_effective_date <= DATEADD(year, -1, CURRENT_DATE)
+    )
+)
+ORDER BY price_increase_percentage DESC;
+```
+
+This complex query finds the closest historical price record from approximately a year ago and compares it with current prices, highlighting significant increases.
+
+### 12. Dynamic SQL Generation
+
+While not a direct use of subqueries in the SQL language, subqueries are often used to generate dynamic SQL statements in applications or stored procedures:
+
+```sql
+-- Stored procedure that generates and executes SQL based on user parameters
+CREATE PROCEDURE generate_sales_report(
+    in_start_date DATE,
+    in_end_date DATE,
+    in_grouping VARCHAR(20) -- 'product', 'category', 'customer', etc.
+)
+AS $$
+DECLARE
+    sql_text TEXT;
+BEGIN
+    -- Construct SQL based on the grouping parameter
+    sql_text := 'SELECT ';
+
+    IF in_grouping = 'product' THEN
+        sql_text := sql_text || 'p.product_id, p.product_name, ';
+    ELSIF in_grouping = 'category' THEN
+        sql_text := sql_text || 'c.category_id, c.category_name, ';
+    ELSIF in_grouping = 'customer' THEN
+        sql_text := sql_text || 'cu.customer_id, cu.customer_name, ';
+    END IF;
+
+    sql_text := sql_text || 'SUM(od.quantity * od.unit_price) AS total_sales
+    FROM order_details od
+    JOIN orders o ON od.order_id = o.order_id ';
+
+    IF in_grouping = 'product' THEN
+        sql_text := sql_text || 'JOIN products p ON od.product_id = p.product_id ';
+    ELSIF in_grouping = 'category' THEN
+        sql_text := sql_text || 'JOIN products p ON od.product_id = p.product_id
+                                JOIN categories c ON p.category_id = c.category_id ';
+    ELSIF in_grouping = 'customer' THEN
+        sql_text := sql_text || 'JOIN customers cu ON o.customer_id = cu.customer_id ';
+    END IF;
+
+    sql_text := sql_text || 'WHERE o.order_date BETWEEN $1 AND $2
+    GROUP BY ';
+
+    IF in_grouping = 'product' THEN
+        sql_text := sql_text || 'p.product_id, p.product_name ';
+    ELSIF in_grouping = 'category' THEN
+        sql_text := sql_text || 'c.category_id, c.category_name ';
+    ELSIF in_grouping = 'customer' THEN
+        sql_text := sql_text || 'cu.customer_id, cu.customer_name ';
+    END IF;
+
+    sql_text := sql_text || 'ORDER BY total_sales DESC';
+
+    -- Execute the dynamically generated SQL
+    EXECUTE sql_text USING in_start_date, in_end_date;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+This stored procedure constructs different SQL queries based on the user's desired grouping, demonstrating how subqueries are part of dynamic SQL generation strategies.
+
+Understanding these use cases helps you recognize when subqueries are the right tool for your SQL challenges. While there are often multiple ways to solve a problem in SQL, subqueries provide an elegant and often intuitive approach for complex data manipulations.
