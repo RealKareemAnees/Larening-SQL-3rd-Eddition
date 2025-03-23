@@ -2551,3 +2551,80 @@ END OF CHAPTER 12
 # Chapter 13: _Indexing_
 
 same as transaction, Indexing will be discussed in the Database engineering summary, also because this book is not really good at explaining anything; it is a great book as a reference, nothing really is, im just telling claude and gpt to explain this and that
+
+# Chapter 14: _Views_
+
+### **SQL Views Explained Simply – Step by Step**
+
+A **view** in SQL is like a **virtual table**. It doesn’t store data itself but shows data from existing tables based on a **query** you define. Think of it as a **saved SELECT statement** that you can use like a table.
+
+---
+
+### **Step 1: Why Use Views?**
+
+- **Security** – Restrict access to certain columns or rows.
+- **Simplicity** – Hide complex queries behind an easy-to-use table.
+- **Consistency** – Ensure all users see the same filtered data.
+
+---
+
+### **Step 2: Creating a View**
+
+To create a view, use:
+
+```sql
+CREATE VIEW view_name AS
+SELECT column1, column2 FROM table_name
+WHERE condition;
+```
+
+Example:
+
+```sql
+CREATE VIEW active_customers AS
+SELECT id, name, email FROM customers
+WHERE status = 'active';
+```
+
+Now, `active_customers` behaves like a table:
+
+```sql
+SELECT * FROM active_customers;
+```
+
+---
+
+### **Step 3: Updating a View**
+
+To change the view definition:
+
+```sql
+CREATE OR REPLACE VIEW active_customers AS
+SELECT id, name FROM customers
+WHERE status = 'active';
+```
+
+---
+
+### **Step 4: Deleting a View**
+
+To remove a view:
+
+```sql
+DROP VIEW active_customers;
+```
+
+---
+
+### **Step 5: Can You Insert, Update, or Delete in a View?**
+
+- Yes, **if** the view is simple (based on a single table without joins or aggregations).
+- Example:
+  ```sql
+  INSERT INTO active_customers (id, name, email) VALUES (4, 'John Doe', 'john@example.com');
+  ```
+- But **if the view is complex** (has joins, GROUP BY, or DISTINCT), updates won’t work.
+
+---
+
+END OF CHAPTER 14
