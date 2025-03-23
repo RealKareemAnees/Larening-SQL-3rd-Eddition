@@ -2547,3 +2547,7 @@ ROLLBACK;  -- Undo changes
 ---
 
 END OF CHAPTER 12
+
+# Chapter 13: _Indexing_
+
+same as transaction, Indexing will be discussed in the Database engineering summary, also because this book is not really good at explaining anything; it is a great book as a reference, nothing really is, im just telling claude and gpt to explain this and that
