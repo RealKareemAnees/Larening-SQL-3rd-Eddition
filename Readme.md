@@ -2628,3 +2628,70 @@ DROP VIEW active_customers;
 ---
 
 END OF CHAPTER 14
+
+# Chapter 15: _Metadata_
+
+### What Is Metadata in SQL?
+
+Metadata in SQL refers to "data about data"—it describes the structure, properties, and organization of database objects such as tables, columns, indexes, and constraints. Metadata helps database administrators (DBAs) and developers understand how data is stored and managed.
+
+---
+
+### **Types of Metadata in SQL**
+
+1. **Schema Metadata** – Describes database structure (tables, columns, indexes, constraints, etc.).
+2. **Data Dictionary Metadata** – Stores information about database objects, users, permissions, and relationships.
+3. **Performance Metadata** – Contains statistics about database usage, query execution plans, and indexing performance.
+4. **Security Metadata** – Defines user roles, permissions, and access control rules.
+
+---
+
+### **How to Access Metadata in SQL**
+
+Most relational databases provide **system tables**, **views**, or **commands** to access metadata.
+
+#### **1. Using INFORMATION_SCHEMA (ANSI SQL Standard)**
+
+Most databases support the `INFORMATION_SCHEMA` views to retrieve metadata.
+
+- **List all tables in a database:**
+  ```sql
+  SELECT table_name FROM INFORMATION_SCHEMA.tables
+  WHERE table_schema = 'public'; -- Change schema as needed
+  ```
+- **List all columns in a specific table:**
+  ```sql
+  SELECT column_name, data_type
+  FROM INFORMATION_SCHEMA.columns
+  WHERE table_name = 'your_table';
+  ```
+
+#### **2. Using System Catalog Views (DBMS-Specific)**
+
+Different databases have their own system views for metadata:
+
+- **PostgreSQL**: `pg_catalog`, `pg_tables`, `pg_indexes`
+- **MySQL**: `SHOW TABLES;`, `SHOW COLUMNS FROM table_name;`
+- **SQL Server**: `sys.tables`, `sys.columns`
+- **Oracle**: `ALL_TABLES`, `ALL_TAB_COLUMNS`
+
+Example for PostgreSQL:
+
+```sql
+SELECT * FROM pg_tables WHERE schemaname = 'public';
+```
+
+---
+
+### **Why Is Metadata Useful?**
+
+- **Database Introspection**: Helps developers understand database structure.
+- **Security & Compliance**: Audits permissions and access control.
+- **Performance Optimization**: Analyzes indexes, queries, and execution plans.
+- **Automation**: Used in tools for schema migration and data management.
+
+Would you like an example specific to a database you're working with?
+
+---
+
+END OF CHAPTER 15
