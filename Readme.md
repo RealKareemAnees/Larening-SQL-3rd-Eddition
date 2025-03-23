@@ -1160,3 +1160,315 @@ SELECT name FROM suppliers;
 ---
 
 END OF CHAPTER 6
+
+# Chapter 7: _Data manipulation_
+
+this chapter introduces MySQL-specific functions
+
+## String Manipulation Functions
+
+Let's start with string concatenation, which varies across database systems:
+
+### String Concatenation
+
+```sql
+-- MySQL
+SELECT CONCAT('Hello', ' ', 'World') AS greeting;
+-- Result: 'Hello World'
+
+-- Oracle
+SELECT 'Hello' || ' ' || 'World' AS greeting FROM dual;
+-- Result: 'Hello World'
+
+-- SQL Server
+SELECT 'Hello' + ' ' + 'World' AS greeting;
+-- Result: 'Hello World'
+```
+
+This demonstrates how different database systems handle the same operation of joining strings together.
+
+### Substring Functions
+
+The SUBSTRING function extracts part of a string:
+
+```sql
+-- MySQL syntax
+SELECT SUBSTRING('Please find the substring in this string', 17, 9) AS extract;
+-- Result: 'substring'
+
+-- Breaking down the parameters:
+-- 'Please find the substring in this string' is the source string
+-- 17 is the starting position (1-indexed in MySQL)
+-- 9 is the length of the substring to extract
+```
+
+### String Padding Functions
+
+LPAD and RPAD add characters to make a string a specific length:
+
+```sql
+-- Left padding (adds characters to the left)
+SELECT LPAD('Price', 10, '*') AS padded_left;
+-- Result: '*****Price'
+
+-- Right padding (adds characters to the right)
+SELECT RPAD('Price', 10, '*') AS padded_right;
+-- Result: 'Price*****'
+```
+
+## Numeric Functions
+
+### Rounding Functions
+
+Let's clarify the ROUND function with examples:
+
+```sql
+-- Round to 2 decimal places
+SELECT ROUND(123.4567, 2) AS rounded_positive;
+-- Result: 123.46
+
+-- Round negative number to 2 decimal places
+SELECT ROUND(-25.76823, 2) AS rounded_negative;
+-- Result: -25.77
+
+-- Round to nearest integer (0 decimal places)
+SELECT ROUND(123.5, 0) AS rounded_integer;
+-- Result: 124
+```
+
+### Floor and Ceiling
+
+These functions round to the nearest integer in a specific direction:
+
+```sql
+-- FLOOR always rounds down to the nearest integer
+SELECT FLOOR(123.99) AS floor_example;
+-- Result: 123
+
+-- CEILING always rounds up to the nearest integer
+SELECT CEIL(123.01) AS ceiling_example;
+-- Result: 124
+```
+
+## Date and Time Functions
+
+### Extracting Parts of Dates
+
+```sql
+-- Extract the month from the current date
+SELECT EXTRACT(MONTH FROM CURRENT_DATE) AS current_month;
+-- If today is December 15, 2023, result would be: 12
+
+-- Extract the year from a specific date
+SELECT EXTRACT(YEAR FROM '2023-12-15') AS specific_year;
+-- Result: 2023
+```
+
+### Adding and Subtracting Time Intervals
+
+```sql
+-- MySQL: Add 3 days to a date
+SELECT DATE_ADD('2023-12-15', INTERVAL 3 DAY) AS future_date;
+-- Result: '2023-12-18'
+
+-- MySQL: Subtract 1 month from a date
+SELECT DATE_SUB('2023-12-15', INTERVAL 1 MONTH) AS past_date;
+-- Result: '2023-11-15'
+
+-- SQL Server: Add 3 days to a date
+SELECT DATEADD(day, 3, '2023-12-15') AS future_date;
+-- Result: '2023-12-18'
+```
+
+## Type Conversion Functions
+
+The CAST function converts data from one type to another:
+
+```sql
+-- Convert string to integer
+SELECT CAST('123' AS SIGNED) AS int_value;
+-- Result: 123
+
+-- Convert string to date
+SELECT CAST('2023-12-15' AS DATE) AS date_value;
+-- Result: 2023-12-15
+
+-- Convert number to string
+SELECT CAST(123.45 AS CHAR) AS string_value;
+-- Result: '123.45'
+```
+
+## Regular Expressions in SQL
+
+Regular expressions provide powerful pattern matching capabilities in SQL. Though implementation varies by database system, MySQL's implementation serves as a good example:
+
+```sql
+-- Check if a string contains a pattern using REGEXP
+SELECT 'Programming' REGEXP 'gram' AS contains_pattern;
+-- Result: 1 (true)
+
+-- Match strings starting with a specific pattern
+SELECT 'Database' REGEXP '^Data' AS starts_with_data;
+-- Result: 1 (true)
+
+-- Match strings ending with a specific pattern
+SELECT 'Database' REGEXP 'base$' AS ends_with_base;
+-- Result: 1 (true)
+
+-- Match any single character with '.'
+SELECT 'Database' REGEXP 'D.tab' AS match_single_char;
+-- Result: 1 (true, matches "Datab")
+
+-- Match numbers in a string
+SELECT 'Room 123' REGEXP '[0-9]+' AS contains_numbers;
+-- Result: 1 (true)
+```
+
+Regular expressions make it possible to perform complex string validation and extraction that would be difficult with basic string functions alone. For example, you could validate email formats or extract specific patterns from text.
+
+## Finding Substrings
+
+The document mentions several functions for locating substrings within larger strings:
+
+```sql
+-- MySQL LOCATE function (returns the position of the first occurrence)
+SELECT LOCATE('SQL', 'Learning SQL is fun') AS position;
+-- Result: 10 (position where 'SQL' starts)
+
+-- LOCATE with starting position parameter
+SELECT LOCATE('a', 'database management', 3) AS position;
+-- Result: 4 (finds the first 'a' starting from position 3)
+
+-- INSTR function (similar to LOCATE)
+SELECT INSTR('Learning SQL is fun', 'SQL') AS position;
+-- Result: 10
+
+-- SQL Server CHARINDEX
+-- CHARINDEX(substring, string, [start_position])
+SELECT CHARINDEX('SQL', 'Learning SQL is fun') AS position;
+-- Result: 10
+```
+
+The key difference between these functions is their syntax and which database systems support them. LOCATE and INSTR are commonly used in MySQL, while CHARINDEX is specific to SQL Server.
+
+## Trigonometric Functions
+
+SQL provides standard trigonometric functions for mathematical calculations:
+
+```sql
+-- Calculate sine of an angle (in radians)
+SELECT SIN(1) AS sine_of_one;
+-- Result: 0.8414709848078965
+
+-- Calculate cosine of an angle
+SELECT COS(0) AS cosine_of_zero;
+-- Result: 1
+
+-- Convert degrees to radians for trigonometric functions
+SELECT SIN(RADIANS(30)) AS sine_of_30_degrees;
+-- Result: 0.5
+
+-- Calculate tangent
+SELECT TAN(RADIANS(45)) AS tangent_of_45_degrees;
+-- Result: 1
+
+-- Calculate arc sine (inverse sine)
+SELECT DEGREES(ASIN(0.5)) AS arcsin_in_degrees;
+-- Result: 30
+```
+
+These functions are particularly useful for scientific and engineering applications where mathematical transformations of data are needed.
+
+## Date Differences and Manipulations
+
+Working with date differences is a common task in SQL:
+
+```sql
+-- Calculate days between two dates
+SELECT DATEDIFF('2023-12-31', '2023-01-01') AS days_in_year;
+-- Result: 364
+
+-- Calculate months between dates (MySQL)
+SELECT PERIOD_DIFF(202312, 202301) AS months_diff;
+-- Result: 11
+
+-- Add different intervals to dates
+SELECT
+    DATE_ADD('2023-01-01', INTERVAL 1 YEAR) AS one_year_later,
+    DATE_ADD('2023-01-01', INTERVAL 3 MONTH) AS three_months_later,
+    DATE_ADD('2023-01-01', INTERVAL 14 DAY) AS two_weeks_later,
+    DATE_ADD('2023-01-01 12:00:00', INTERVAL 30 MINUTE) AS thirty_min_later;
+/* Results:
+   one_year_later: '2024-01-01'
+   three_months_later: '2023-04-01'
+   two_weeks_later: '2023-01-15'
+   thirty_min_later: '2023-01-01 12:30:00'
+*/
+```
+
+These functions allow for sophisticated date-based calculations, which are essential for reporting, scheduling, and business intelligence applications.
+
+## Date Formatting
+
+While the document doesn't provide specific examples of date formatting functions, this is an important topic:
+
+```sql
+-- MySQL DATE_FORMAT function for custom date formatting
+SELECT DATE_FORMAT('2023-12-15', '%W, %M %d, %Y') AS formatted_date;
+-- Result: 'Friday, December 15, 2023'
+
+-- Common format specifiers:
+-- %Y = 4-digit year (2023)
+-- %y = 2-digit year (23)
+-- %m = month as a number (01-12)
+-- %M = month name (January-December)
+-- %d = day of month (01-31)
+-- %W = weekday name (Sunday-Saturday)
+-- %H = hour (00-23)
+-- %i = minutes (00-59)
+-- %s = seconds (00-59)
+
+-- SQL Server date formatting using CONVERT with style parameter
+SELECT CONVERT(VARCHAR, GETDATE(), 107) AS formatted_date;
+-- Result: 'Dec 15, 2023' (style 107 produces this format)
+```
+
+Date formatting is crucial for presenting dates in a readable format for reports and user interfaces.
+
+## Complex Type Conversion Examples
+
+The CAST and CONVERT functions are essential for data type conversions:
+
+```sql
+-- Convert between various data types
+SELECT
+    CAST('2023-12-15' AS DATE) AS string_to_date,
+    CAST(123.45 AS DECIMAL(10,1)) AS rounded_decimal,
+    CAST(0 AS BOOLEAN) AS numeric_to_boolean,
+    CAST(CURRENT_TIMESTAMP AS DATE) AS timestamp_to_date;
+/* Results:
+   string_to_date: 2023-12-15
+   rounded_decimal: 123.5 (rounded to 1 decimal place)
+   numeric_to_boolean: FALSE (0 converts to false in boolean context)
+   timestamp_to_date: 2023-12-15 (time portion removed)
+*/
+
+-- Formatting numbers as currency strings
+SELECT CONCAT('$', FORMAT(1234567.89, 2)) AS currency_format;
+-- Result: '$1,234,567.89'
+
+-- Converting between character sets (MySQL)
+SELECT CONVERT('Sample text' USING utf8mb4) AS converted_text;
+-- Result: Same text but encoded in UTF-8
+```
+
+Type conversions are particularly important when:
+
+1. Importing data from external sources
+2. Preparing data for display or export
+3. Performing calculations that require specific data types
+4. Comparing values of different types
+
+---
+
+END OF CHAPTER 7
