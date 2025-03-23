@@ -2695,3 +2695,29 @@ Would you like an example specific to a database you're working with?
 ---
 
 END OF CHAPTER 15
+
+# Chapter 16: _Window functions_
+
+I personally do not understant it well except it can be used for ranking or for progress tracking; Iknow how it works, but I dont know how to write it because I dont understand yet the syntax
+
+im not really willing to spend time now on it
+
+---
+
+END OF CHAPTER 16
+
+# Chapter 17, 18: _Scaling_
+
+this chapter is discussed very bad in the book and it is better be explained at the Database engineering
+
+#
+
+#
+
+#
+
+#
+
+# THE END
+
+congradulations for reaching this point
