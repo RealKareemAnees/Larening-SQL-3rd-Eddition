@@ -2,6 +2,8 @@
 
 **I have studies this book a year a go for a project, since that - unfortunately - I have never touched SQL since that, therefore im rereading the book and summarizing it because I need understanding of SQL for the upcomming stage**
 
+TBH this is best ever SQL crash course/refresher on the internet
+
 > If you like this summary; you can visit me on [Linkedin](https://www.linkedin.com/in/kareem-anees-0496b62b3/)
 
 # Chapter 1:- _Intro_
@@ -142,7 +144,7 @@ currency ENUM('EGP', 'USD', 'SAR')
 
 END OF CHAPTER 2
 
-# Chapter 3
+# Chapter 3: _Query Primer_
 
 this chapter talks about basic query clauses such as `SELECT` and `FROM`, etc...
 
@@ -306,3 +308,520 @@ Each of the following clauses will be discusses in detail in it's chapter but fo
 ---
 
 THE END OF CHAPTER 3
+
+# Chapter 4: _Filtering_
+
+## WHERE, OR, NOT, AND
+
+this better demonstrated with tables and examples than BS
+
+| Intermediate result    | Final result |
+| ---------------------- | ------------ |
+| `WHERE true OR true`   | true         |
+| `WHERE true OR false`  | true         |
+| `WHERE false OR true`  | true         |
+| `WHERE false OR false` | false        |
+
+Example:
+
+```sql
+SELECT * FROM users
+WHERE first_name = 'STEVEN' OR create_date > '2006-01-01';
+```
+
+---
+
+| Intermediate result          | Final result |
+| ---------------------------- | ------------ |
+| `(true OR true) AND true`    | true         |
+| `(true OR false) AND true`   | true         |
+| `(false OR true) AND true`   | true         |
+| `(false OR false) AND true`  | false        |
+| `(true OR true) AND false`   | false        |
+| `(true OR false) AND false`  | false        |
+| `(false OR true) AND false`  | false        |
+| `(false OR false) AND false` | false        |
+
+Example:
+
+```sql
+SELECT * FROM users
+WHERE (first_name = 'STEVEN' OR last_name = 'YOUNG')
+AND create_date > '2006-01-01';
+```
+
+---
+
+| Intermediate result              | Final result |
+| -------------------------------- | ------------ |
+| `NOT (true OR true) AND true`    | false        |
+| `NOT (true OR false) AND true`   | false        |
+| `NOT (false OR true) AND true`   | false        |
+| `NOT (false OR false) AND true`  | true         |
+| `NOT (true OR true) AND false`   | false        |
+| `NOT (true OR false) AND false`  | false        |
+| `NOT (false OR true) AND false`  | false        |
+| `NOT (false OR false) AND false` | false        |
+
+Example:
+
+```sql
+SELECT * FROM users
+WHERE NOT (first_name = 'STEVEN' OR last_name = 'YOUNG')
+AND create_date > '2006-01-01';
+```
+
+---
+
+## Building Conditions
+
+**Comparison operators** are `=`, `!=`, `<`, `>`, `<>`
+
+> `<>` is just `=`
+
+> there are also comparison keywords like `IN`, `NOT IN`, `BETWEEN`
+
+**This part is better demonstrated using the book's examples: **
+
+### Query:
+
+```sql
+SELECT c.email
+FROM customer c
+INNER JOIN rental r ON c.customer_id = r.customer_id
+WHERE date(r.rental_date) = '2005-06-14';
+```
+
+### Output:
+
+| email                                 |
+| ------------------------------------- |
+| CATHERINE.CAMPBELL@sakilacustomer.org |
+| JOYCE.EDWARDS@sakilacustomer.org      |
+| TERRENCE.GUNDERSON@sakilacustomer.org |
+
+**16 rows in set (0.03 sec)**
+
+---
+
+## Inequality Conditions
+
+### Query:
+
+```sql
+SELECT c.email
+FROM customer c
+INNER JOIN rental r ON c.customer_id = r.customer_id
+WHERE date(r.rental_date) <> '2005-06-14';
+```
+
+### Output (Truncated):
+
+| email                             |
+| --------------------------------- |
+| MARY.SMITH@sakilacustomer.org     |
+| AUSTIN.CINTRON@sakilacustomer.org |
+
+**16028 rows in set (0.03 sec)**
+
+---
+
+## Data Modification Using Equality Conditions
+
+### Query:
+
+```sql
+DELETE FROM rental
+WHERE year(rental_date) = 2004;
+```
+
+---
+
+### Query:
+
+```sql
+DELETE FROM rental
+WHERE year(rental_date) <> 2005 AND year(rental_date) <> 2006;
+```
+
+---
+
+## Range Conditions
+
+### Query:
+
+```sql
+SELECT customer_id, rental_date
+FROM rental
+WHERE rental_date < '2005-05-25';
+```
+
+### Output:
+
+| customer_id | rental_date         |
+| ----------- | ------------------- |
+| 130         | 2005-05-24 22:53:30 |
+| 459         | 2005-05-24 22:54:33 |
+| 408         | 2005-05-24 23:03:39 |
+| 333         | 2005-05-24 23:04:41 |
+| 239         | 2005-05-24 23:31:46 |
+
+**8 rows in set (0.00 sec)**
+
+---
+
+### Query:
+
+```sql
+SELECT customer_id, rental_date
+FROM rental
+WHERE rental_date <= '2005-06-16' AND rental_date >= '2005-06-14';
+```
+
+### Output (Truncated):
+
+| customer_id | rental_date         |
+| ----------- | ------------------- |
+| 416         | 2005-06-14 22:53:33 |
+| 516         | 2005-06-14 22:55:13 |
+| 239         | 2005-06-14 23:00:34 |
+| 285         | 2005-06-14 23:07:08 |
+
+**364 rows in set (0.00 sec)**
+
+---
+
+## Using `BETWEEN` Operator
+
+### Query:
+
+```sql
+SELECT customer_id, rental_date
+FROM rental
+WHERE rental_date BETWEEN '2005-06-14' AND '2005-06-16';
+```
+
+### Output (Truncated):
+
+| customer_id | rental_date         |
+| ----------- | ------------------- |
+| 416         | 2005-06-14 22:53:33 |
+| 516         | 2005-06-14 22:55:13 |
+| 239         | 2005-06-14 23:00:34 |
+| 285         | 2005-06-14 23:07:08 |
+| 310         | 2005-06-14 23:09:38 |
+| 592         | 2005-06-14 23:12:46 |
+
+**364 rows in set (0.00 sec)**
+
+---
+
+### Incorrect Use of `BETWEEN`:
+
+```sql
+SELECT customer_id, rental_date
+FROM rental
+WHERE rental_date BETWEEN '2005-06-16' AND '2005-06-14';
+```
+
+**Output:**  
+_Empty set (0.00 sec)_
+
+---
+
+## Numeric Ranges
+
+### Query:
+
+```sql
+SELECT customer_id, payment_date, amount
+FROM payment
+WHERE amount BETWEEN 10.0 AND 11.99;
+```
+
+### Output:
+
+| customer_id | payment_date        | amount |
+| ----------- | ------------------- | ------ |
+| 2           | 2005-07-30 13:47:43 | 10.99  |
+| 3           | 2005-07-27 20:23:12 | 10.99  |
+| 12          | 2005-08-01 06:50:26 | 10.99  |
+| 29          | 2005-07-09 21:55:19 | 10.99  |
+
+**114 rows in set (0.01 sec)**
+
+---
+
+## String Ranges
+
+### Query:
+
+```sql
+SELECT last_name, first_name
+FROM customer
+WHERE last_name BETWEEN 'FA' AND 'FR';
+```
+
+### Output:
+
+| last_name  | first_name |
+| ---------- | ---------- |
+| FARNSWORTH | JOHN       |
+| FENNELL    | ALEXANDER  |
+| FERGUSON   | BERTHA     |
+| FERNANDEZ  | MELINDA    |
+| FOWLER     | JO         |
+| FOX        | HOLLY      |
+
+**18 rows in set (0.00 sec)**
+
+---
+
+### Query:
+
+```sql
+SELECT last_name, first_name
+FROM customer
+WHERE last_name BETWEEN 'FA' AND 'FRB';
+```
+
+### Output:
+
+| last_name  | first_name |
+| ---------- | ---------- |
+| FARNSWORTH | JOHN       |
+| FRALEY     | JUAN       |
+| FRANCISCO  | JOEL       |
+| FRANKLIN   | BETH       |
+| FRAZIER    | GLENDA     |
+
+**22 rows in set (0.00 sec)**
+
+---
+
+## Menmbershipt
+
+the membership is achieved by `IN` keyword
+
+like
+
+```SQL
+SELECT fname, lname
+FROM people
+WHERE title IN ('eng','phd');
+```
+
+not only that
+
+we can create a range from a select clause
+
+like
+
+```SQL
+SELECT fname, lname
+FROM people
+WHERE title IN (SELECT title FROM people WHERE country = "Egypt");
+```
+
+the above code will create a range of names of people who are only egyptian, then with will search with this range of names for people with phd
+
+## Extra points
+
+### **1. Partial String Matching**
+
+To find customers whose last names begin with "Q", you can use the `LEFT()` function:
+
+```sql
+SELECT last_name, first_name
+FROM customer
+WHERE LEFT(last_name, 1) = 'Q';
+```
+
+This method works but is not flexible. A better approach is using wildcards.
+
+---
+
+### **2. Using Wildcards (`LIKE` Operator)**
+
+Wildcards provide more control over pattern matching:
+
+- **Find names that start with "Q"**
+  ```sql
+  SELECT last_name, first_name
+  FROM customer
+  WHERE last_name LIKE 'Q%';
+  ```
+- **Find names that end with "t"**
+  ```sql
+  SELECT last_name, first_name
+  FROM customer
+  WHERE last_name LIKE '%t';
+  ```
+- **Find names containing "bas" anywhere**
+  ```sql
+  SELECT last_name, first_name
+  FROM customer
+  WHERE last_name LIKE '%bas%';
+  ```
+- **Find names that have "A" in the second position and "T" in the fourth position, ending with "S"**
+  ```sql
+  SELECT last_name, first_name
+  FROM customer
+  WHERE last_name LIKE '_A_T%S';
+  ```
+
+---
+
+### **3. Using Regular Expressions (`REGEXP`) for Advanced Matching**
+
+If wildcards are not enough, regular expressions (`REGEXP`) can be used:
+
+- **Find names that start with "Q" or "Y"**
+  ```sql
+  SELECT last_name, first_name
+  FROM customer
+  WHERE last_name REGEXP '^[QY]';
+  ```
+- **Find names that have exactly four characters, with "t" in the third position**
+  ```sql
+  SELECT last_name, first_name
+  FROM customer
+  WHERE last_name REGEXP '^..t.$';
+  ```
+- **Find names that follow a specific format (e.g., 11-character names with dashes in the fourth and seventh positions)**
+  ```sql
+  SELECT last_name, first_name
+  FROM customer
+  WHERE last_name REGEXP '^...-..-.....$';
+  ```
+
+---
+
+### **4. Handling NULL Values**
+
+`NULL` means "no value" and must be handled using `IS NULL` or `IS NOT NULL`.
+
+- **Find all rentals that were never returned (return_date is NULL)**
+  ```sql
+  SELECT rental_id, customer_id
+  FROM rental
+  WHERE return_date IS NULL;
+  ```
+- **Find all rentals that have been returned (return_date is NOT NULL)**
+  ```sql
+  SELECT rental_id, customer_id, return_date
+  FROM rental
+  WHERE return_date IS NOT NULL;
+  ```
+
+⚠️ **Mistake to Avoid**: Using `= NULL` instead of `IS NULL`.  
+Incorrect query (returns no results):
+
+```sql
+SELECT rental_id, customer_id
+FROM rental
+WHERE return_date = NULL;  -- ❌ Wrong!
+```
+
+---
+
+### **5. Combining Conditions with NULL Handling**
+
+To find rentals that were **not returned between May and August 2005**, accounting for `NULL` values:
+
+```sql
+SELECT rental_id, customer_id, return_date
+FROM rental
+WHERE return_date IS NULL
+   OR return_date NOT BETWEEN '2005-05-01' AND '2005-09-01';
+```
+
+This ensures we include both:
+
+1. Rentals that were returned outside the date range.
+2. Rentals that were never returned (`NULL` values).
+
+## NULL
+
+> two nulls are not equal each other, because NULL iis not equal to anything
+
+NULL means that a value is missing or doesnt exist; the value itself is not equal null
+
+### **here is how to work with NULL in SQL:**
+
+1. **`NULL` is not equal to anything, even another `NULL`**
+
+   - `NULL = NULL` is **false** because `NULL` represents an unknown value.
+   - To check for `NULL`, you must use `IS NULL` or `IS NOT NULL`, not `=` or `!=`.
+     ```sql
+     SELECT * FROM users WHERE email IS NULL;
+     ```
+
+2. **Operations with `NULL` result in `NULL`**
+
+   - Any arithmetic or string operation with `NULL` will return `NULL`:
+     ```sql
+     SELECT 5 + NULL;  -- Result: NULL
+     SELECT 'Hello' || NULL;  -- Result: NULL
+     ```
+
+3. **Handling `NULL` in Queries**
+
+   - **`COALESCE()`**: Returns the first non-null value from a list.
+     ```sql
+     SELECT COALESCE(NULL, 'Default', 'Fallback');  -- Result: 'Default'
+     ```
+   - **`IFNULL()` (MySQL) or `NVL()` (Oracle)**: Similar to `COALESCE()` but only takes two arguments.
+     ```sql
+     SELECT IFNULL(NULL, 'Fallback');  -- Result: 'Fallback'
+     ```
+   - **`NULLIF()`**: Returns `NULL` if two values are equal; otherwise, it returns the first value.
+     ```sql
+     SELECT NULLIF(10, 10);  -- Result: NULL
+     SELECT NULLIF(10, 20);  -- Result: 10
+     ```
+
+4. **`NULL` and Aggregate Functions**
+
+   - Most aggregate functions ignore `NULL` values:
+     ```sql
+     SELECT AVG(salary) FROM employees;  -- NULL salaries are ignored
+     ```
+   - But `COUNT(*)` includes `NULL` values, while `COUNT(column_name)` excludes them.
+     ```sql
+     SELECT COUNT(*) FROM employees;       -- Counts all rows
+     SELECT COUNT(salary) FROM employees;  -- Excludes NULL salaries
+     ```
+
+5. **Sorting and Filtering `NULL`**
+   - When sorting, `NULL` values appear **first or last** depending on the database and `ORDER BY` direction.
+     ```sql
+     SELECT * FROM employees ORDER BY salary ASC;  -- NULLs appear first
+     SELECT * FROM employees ORDER BY salary DESC; -- NULLs appear last
+     ```
+   - You can control this using `NULLS FIRST` or `NULLS LAST` (supported in PostgreSQL and some others).
+     ```sql
+     SELECT * FROM employees ORDER BY salary DESC NULLS LAST;
+     ```
+
+### Example: Handling `NULL` in a Table
+
+Imagine a table `customers`:
+
+| id  | name  | email          |
+| --- | ----- | -------------- |
+| 1   | John  | john@email.com |
+| 2   | Alice | NULL           |
+| 3   | Bob   | bob@email.com  |
+
+#### Queries:
+
+- Find customers with no email:
+
+  ```sql
+  SELECT * FROM customers WHERE email IS NULL; -- will work
+  ```
+
+---
+
+END OF CHAPTER 4
