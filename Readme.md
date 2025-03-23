@@ -2299,3 +2299,181 @@ $$ LANGUAGE plpgsql;
 This stored procedure constructs different SQL queries based on the user's desired grouping, demonstrating how subqueries are part of dynamic SQL generation strategies.
 
 Understanding these use cases helps you recognize when subqueries are the right tool for your SQL challenges. While there are often multiple ways to solve a problem in SQL, subqueries provide an elegant and often intuitive approach for complex data manipulations.
+
+---
+
+END OF CHAPTER 9
+
+# Chapter 10: _Joins Revisited_
+
+this chapter exmplains outer joins
+
+### **1. Outer Joins**
+
+An **outer join** returns matching rows from both tables plus the unmatched rows from one or both tables.  
+Types of outer joins:
+
+- **LEFT OUTER JOIN**: Returns all rows from the left table and matching rows from the right table.
+- **RIGHT OUTER JOIN**: Returns all rows from the right table and matching rows from the left table.
+- **FULL OUTER JOIN**: Returns all rows from both tables, filling unmatched values with `NULL`.
+
+#### **Example**
+
+```sql
+CREATE TABLE Employees (
+    id INT PRIMARY KEY,
+    name VARCHAR(50)
+);
+
+CREATE TABLE Departments (
+    id INT PRIMARY KEY,
+    department VARCHAR(50),
+    emp_id INT
+);
+
+INSERT INTO Employees VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Charlie');
+INSERT INTO Departments VALUES (1, 'HR', 1), (2, 'IT', 2), (3, 'Finance', NULL);
+```
+
+### **2. Left vs. Right Outer Joins**
+
+- **LEFT JOIN (LEFT OUTER JOIN)**: Returns all rows from the left table, even if there's no match in the right table.
+- **RIGHT JOIN (RIGHT OUTER JOIN)**: Returns all rows from the right table, even if there's no match in the left table.
+
+#### **LEFT JOIN Example**
+
+```sql
+SELECT e.name, d.department
+FROM Employees e
+LEFT JOIN Departments d ON e.id = d.emp_id;
+```
+
+✅ **Result**:
+
+```
+name    | department
+--------|------------
+Alice   | HR
+Bob     | IT
+Charlie | NULL  -- No matching department
+```
+
+#### **RIGHT JOIN Example**
+
+```sql
+SELECT e.name, d.department
+FROM Employees e
+RIGHT JOIN Departments d ON e.id = d.emp_id;
+```
+
+✅ **Result**:
+
+```
+name    | department
+--------|------------
+Alice   | HR
+Bob     | IT
+NULL    | Finance  -- No matching employee
+```
+
+---
+
+### **3. Three-Way Outer Joins**
+
+A **three-way outer join** involves three tables using outer joins.
+
+#### **Example**
+
+```sql
+CREATE TABLE Projects (
+    id INT PRIMARY KEY,
+    project_name VARCHAR(50),
+    emp_id INT
+);
+
+INSERT INTO Projects VALUES (1, 'Project A', 1), (2, 'Project B', NULL);
+```
+
+```sql
+SELECT e.name, d.department, p.project_name
+FROM Employees e
+LEFT JOIN Departments d ON e.id = d.emp_id
+LEFT JOIN Projects p ON e.id = p.emp_id;
+```
+
+✅ **Result**:
+
+```
+name    | department | project_name
+--------|------------|--------------
+Alice   | HR        | Project A
+Bob     | IT        | NULL
+Charlie | NULL      | NULL
+```
+
+---
+
+### **4. Cross Joins**
+
+A **CROSS JOIN** returns all possible combinations of rows from two tables (Cartesian product).
+
+#### **Example**
+
+```sql
+SELECT e.name, d.department
+FROM Employees e
+CROSS JOIN Departments d;
+```
+
+✅ **Result** _(3 employees × 3 departments = 9 rows)_:
+
+```
+name    | department
+--------|------------
+Alice   | HR
+Alice   | IT
+Alice   | Finance
+Bob     | HR
+Bob     | IT
+Bob     | Finance
+Charlie | HR
+Charlie | IT
+Charlie | Finance
+```
+
+---
+
+### **5. Natural Joins**
+
+A **NATURAL JOIN** automatically joins tables based on columns with the same name.
+
+#### **Example**
+
+```sql
+SELECT * FROM Employees
+NATURAL JOIN Departments;
+```
+
+✅ **Equivalent to**:
+
+```sql
+SELECT e.id, e.name, d.department
+FROM Employees e
+INNER JOIN Departments d ON e.id = d.emp_id;
+```
+
+---
+
+### **Summary Table**
+
+| Join Type        | Behavior                                                  |
+| ---------------- | --------------------------------------------------------- |
+| **LEFT JOIN**    | All rows from left table, matching rows from right table. |
+| **RIGHT JOIN**   | All rows from right table, matching rows from left table. |
+| **FULL JOIN**    | All rows from both tables.                                |
+| **CROSS JOIN**   | Every row of Table A × Every row of Table B.              |
+| **NATURAL JOIN** | Auto-matches common column names.                         |
+
+---
+
+END CHAPTER 10
