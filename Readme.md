@@ -1015,3 +1015,148 @@ _(Results will have **4 customers × 4 orders = 16 rows**.)_
 ---
 
 END OF CHAPTER 5
+
+# Chapter 6: _Sets_
+
+the first part of this chapter talks about sets (union, intersection, exception)
+
+> an SQL command called `desc` which is used to describe the schema of a table
+
+## Set Operators
+
+set operators are used to combine resuts of multiple queries in one transaction
+
+the are UNION, UNIOIN ALL, INTERSECR, EXCEPT
+
+### **Sample Tables:**
+
+We have two tables:
+
+#### **Customers Table** (`customers`)
+
+| id  | name  | city       |
+| --- | ----- | ---------- |
+| 1   | Ali   | Cairo      |
+| 2   | Omar  | Giza       |
+| 3   | Salma | Alexandria |
+| 4   | Nada  | Cairo      |
+
+#### **Suppliers Table** (`suppliers`)
+
+| id  | name    | city       |
+| --- | ------- | ---------- |
+| 1   | Ahmed   | Cairo      |
+| 2   | Omar    | Giza       |
+| 3   | Nada    | Alexandria |
+| 4   | Youssef | Luxor      |
+
+---
+
+### **1. UNION (Removes Duplicates)**
+
+Combines unique names from both tables.
+
+```sql
+SELECT name FROM customers
+UNION
+SELECT name FROM suppliers;
+```
+
+#### **Result:**
+
+| name    |
+| ------- |
+| Ali     |
+| Omar    |
+| Salma   |
+| Nada    |
+| Ahmed   |
+| Youssef |
+
+👉 **"Omar" and "Nada" appear in both tables but are included only once.**
+
+---
+
+### **2. UNION ALL (Includes Duplicates)**
+
+Combines names but **keeps duplicates**.
+
+```sql
+SELECT name FROM customers
+UNION ALL
+SELECT name FROM suppliers;
+```
+
+#### **Result:**
+
+| name    |
+| ------- |
+| Ali     |
+| Omar    |
+| Salma   |
+| Nada    |
+| Ahmed   |
+| Omar    |
+| Nada    |
+| Youssef |
+
+👉 **"Omar" and "Nada" appear twice because they exist in both tables.**
+
+---
+
+### **3. INTERSECT (Common Records in Both Tables)**
+
+Returns only names **that exist in both** `customers` and `suppliers`.
+
+```sql
+SELECT name FROM customers
+INTERSECT
+SELECT name FROM suppliers;
+```
+
+#### **Result:**
+
+| name |
+| ---- |
+| Omar |
+| Nada |
+
+👉 **Only "Omar" and "Nada" are common in both tables.**  
+(_Note:_ `INTERSECT` is not supported in MySQL.)
+
+---
+
+### **4. EXCEPT (MINUS in Oracle)**
+
+Returns names from `customers` **that are NOT in** `suppliers`.
+
+```sql
+SELECT name FROM customers
+EXCEPT
+SELECT name FROM suppliers;
+```
+
+#### **Result:**
+
+| name  |
+| ----- |
+| Ali   |
+| Salma |
+
+👉 **"Ali" and "Salma" are in `customers` but NOT in `suppliers`.**  
+(_In Oracle, use `MINUS` instead of `EXCEPT`._)
+
+---
+
+### **Summary Table**
+
+| Operator           | Function                                            |
+| ------------------ | --------------------------------------------------- |
+| `UNION`            | Combines results, removes duplicates                |
+| `UNION ALL`        | Combines results, keeps duplicates                  |
+| `INTERSECT`        | Returns common rows in both tables                  |
+| `EXCEPT` (`MINUS`) | Returns rows from the first table not in the second |
+
+---
+
+END OF CHAPTER 6
